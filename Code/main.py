@@ -80,7 +80,7 @@ class Boat(pygame.sprite.Sprite):
         screen.blit(temphull, self.hullRect)
 
     def turn(self, angle):
-        angularvelocitysteps = 5
+        angularvelocitysteps = 7
         if angle != 0:
             self.angularVelocity = np.clip(self.angularVelocity + (angle / angularvelocitysteps), -5, 5)
         else:
@@ -124,7 +124,7 @@ class Boat(pygame.sprite.Sprite):
 
     def calcSpeed(self):
         acceleration = self.acceleration()
-        self.speed = np.clip(self.speed + acceleration, minSpeed(self.boatAngleToWind) * self.wind[0], maxSpeed(self.boatAngleToWind) * self.wind[0])
+        self.speed = np.clip(self.speed + acceleration - (abs(self.angularVelocity) * 0.01), minSpeed(self.boatAngleToWind) * self.wind[0], maxSpeed(self.boatAngleToWind) * self.wind[0])
         self.speedx = math.sin(math.radians(self.angle))*self.speed + (math.sin(math.radians(self.wind[1])) * (0.1 * self.wind[0]))
         self.speedy = math.cos(math.radians(self.angle))*self.speed - (math.cos(math.radians(self.wind[1])) * (0.1 * self.wind[0]))
 
@@ -159,11 +159,11 @@ def debugtick():
         # print("Wind Angle:", player.wind[1])
         # print("Pos X:", player.posx)
         # print("Pos Y:", player.posy)
-        print("Tack:", player.tack)
-        print("Sail Angle to Wind:", player.sailAngleToWind)
-        print("Starboard Boat angle", (player.angle + player.wind[1]) % 360)
+        # print("Tack:", player.tack)
+        # print("Sail Angle to Wind:", player.sailAngleToWind)
+        # print("Starboard Boat angle", (player.angle + player.wind[1]) % 360)
         # print("Acceleration:", player.acceleration())
-        # print("Speed:", player.speed)
+        print("Speed:", player.speed)
         # print("Angular Velocity", player.angularVelocity)
         threading.Timer(1,debugtick).start()
 
