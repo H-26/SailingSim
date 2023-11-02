@@ -1,14 +1,14 @@
 import pygame
 import math
 import wind
+import map
 import numpy as np
-
 
 class Boat(pygame.sprite.Sprite):
 
-    def __init__(self):
+    def __init__(self, scale):
         super().__init__()
-        self.scale = 0.1
+        self.scale = scale
         self.posx = 400
         self.posy = 300
         self.angle = 0
@@ -19,6 +19,7 @@ class Boat(pygame.sprite.Sprite):
 
         self.hull = pygame.transform.scale(pygame.image.load("../Assets/Boat.png").convert_alpha(), ((1210*self.scale), (916*self.scale)))
         self.hullRect = self.hull.get_rect()
+        self.hullMask = pygame.mask.from_surface(self.hull)
         self.tack = "port"
 
         self.portSail = pygame.transform.scale(pygame.image.load("../Assets/portSail.png").convert_alpha(), ((1250*self.scale), (1250*self.scale)))

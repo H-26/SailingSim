@@ -1,11 +1,13 @@
 # Imports
 import pygame, sys, threading
 from boat import Boat
+import map
 import wind
 
 # Setup
 pygame.init()
 
+scale = 0.1
 
 # Window initiation
 screenWidth = 900
@@ -46,7 +48,10 @@ def tick():
         threading.Timer(0.05, tick).start()
 
 # Player
-player = Boat()
+player = Boat(scale)
+
+# Map
+map = Map(scale, "Test Map")
 
 running = True
 
@@ -60,7 +65,7 @@ while running:
     for event in pygame.event.get():
         # Check if quit button pressed and quit
         if event.type == pygame.QUIT:
-            running = False
+            running = Fals
         else:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 5:
