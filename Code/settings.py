@@ -6,7 +6,7 @@ default = '{"wind":}'
 
 def checkSettings(json):
     if json == default
-
+# Check which platform is being used and set path accordingly
 match platform.system():
     case "Linux":
         path = "/home/" + os.getlogin() + "/.config/SailingSim/settings.json"

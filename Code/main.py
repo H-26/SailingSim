@@ -20,6 +20,7 @@ pygame.display.set_icon(icon)
 
 keys = pygame.key.get_pressed()
 
+# Debug tick to print variables
 def debugtick():
     if running:
         print("================================")
@@ -36,6 +37,7 @@ def debugtick():
         # print("Angular Velocity", player.angularVelocity)
         threading.Timer(1,debugtick).start()
 
+# Tick to update at regular intervals regardless of framerate
 def tick():
     if running:
         global keys

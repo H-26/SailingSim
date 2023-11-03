@@ -5,3 +5,8 @@ class Map(pygame.sprite.Sprite):
         super().__init__()
         self.scale = scale
         self.image = pygame.transform.scale(pygame.image.load("../Assets/" + map + ".png").convert_alpha(), ((1210*self.scale), (916*self.scale)))
+
+        # Function change the scale of the map
+        def scale(newscale):
+            self.scale = newscale
+            self.image = pygame.transform.scale(pygame.image.load("../Assets/" + map + ".png").convert_alpha(), ((1210*self.scale), (916*self.scale)))

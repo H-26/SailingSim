@@ -4,8 +4,9 @@ import wind
 import map
 import numpy as np
 
+# Boat class
 class Boat(pygame.sprite.Sprite):
-
+    # Constructor
     def __init__(self, scale):
         super().__init__()
         self.scale = scale
@@ -30,7 +31,7 @@ class Boat(pygame.sprite.Sprite):
         self.wind = wind.localWind(self.hullRect.centerx, self.hullRect.centery)
         self.sailAngleToWind = (180 - self.angle % 180) - self.sailAngle - self.wind[1]
         self.boatAngleToWind = (180 - self.angle % 180) - self.wind[1]
-
+    # Draw sail on boat and boat on screen
     def draw(self, screen):
         temphull = self.hull.copy()
         self.hullRect = temphull.get_rect()
@@ -44,7 +45,7 @@ class Boat(pygame.sprite.Sprite):
         self.hullRect = temphull.get_rect()
         self.hullRect.center = self.posx, self.posy
         screen.blit(temphull, self.hullRect)
-
+    # Turn boat
     def turn(self, angle):
         print("Angle:", angle)
         angularvelocitysteps = 7
@@ -56,7 +57,7 @@ class Boat(pygame.sprite.Sprite):
             elif self.angularVelocity < 0:
                 self.angularVelocity = np.clip((self.angularVelocity + ((-self.angularVelocity * self.speed) / 25)), -5, 0)
         self.angle = (self.angle + np.clip((self.angularVelocity * self.speed), -3, 3)) % 360
-
+    # Rotate sail on boat
     def trimSail(self, angle):
         if self.sailAngleToWind > 0 or angle > 0:
             if self.tack == "port":
@@ -69,7 +70,7 @@ class Boat(pygame.sprite.Sprite):
                 self.sailAngle = np.clip(((self.sailAngle - angle / anglecoefficient) % 360),10,100)
             elif self.tack == "starboard":
                 self.sailAngle = np.clip(((self.sailAngle + angle / anglecoefficient) % 360), 260, 350)
-
+    # Change tack
     def changeTack(self):
         boatangle = (self.angle + self.wind[1]) % 360
         if 0 < (boatangle) < 160 and self.tack == "port":
@@ -88,13 +89,13 @@ class Boat(pygame.sprite.Sprite):
             self.sail = self.starboardSail.copy()
         elif self.sailAngleToWind < 0 and self.tack == "starboard":
             self.sail = self.portSail.copy()
-
+    # Calculate speed of boat using acceleration
     def calcSpeed(self):
         acceleration = self.acceleration()
         self.speed = np.clip(self.speed + acceleration - (abs(self.angularVelocity) * 0.01), wind.minSpeed(self.boatAngleToWind) * self.wind[0], wind.maxSpeed(self.boatAngleToWind) * self.wind[0])
         self.speedx = math.sin(math.radians(self.angle))*self.speed + (math.sin(math.radians(self.wind[1])) * (0.1 * self.wind[0]))
         self.speedy = math.cos(math.radians(self.angle))*self.speed - (math.cos(math.radians(self.wind[1])) * (0.1 * self.wind[0]))
-
+    # Calculate acceleration of boat
     def acceleration(self):
         self.wind = wind.localWind(self.hullRect.centerx, self.hullRect.centery)
         if self.tack == "starboard":
@@ -104,13 +105,13 @@ class Boat(pygame.sprite.Sprite):
             self.boatAngleToWind = (360 - self.angle - self.wind[1]) % 360
             self.sailAngleToWind = self.boatAngleToWind - self.sailAngle
         return wind.accelerationFunction(self.sailAngleToWind)*self.wind[0]
-
+    # Update boat
     def update(self, keys):
         self.move()
         self.turn((keys[pygame.K_d] - keys[pygame.K_a]))
         self.changeTack()
         self.calcSpeed()
-
+    # Move boat according to speed
     def move(self):
         velocity = self.acceleration()
         self.posx -= self.speedx
