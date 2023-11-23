@@ -19,7 +19,7 @@ y = np.array([-0.9, 0, 0])
 minSpeed = CubicHermiteSpline(x=x, y=y, dydx=np.zeros_like(y))
 
 def localWind(posx, posy):
-    return(5,0)
+    return(10,0)
     windspeed = 5
     # print(noise.pnoise2(posx, float(posy), octaves=1, persistance=0.5, lacunarity=2.0, repeatx=1024, repeaty=1024, base=0.0))
     # return windspeed * int(noise.pnoise2(posx + ((math.sin(math.radians(windspeed)) * windspeed) * (pygame.time.get_ticks() / 50)), posy - ((math.sin(math.radians(windspeed)) * (0.1 * windspeed)) * (pygame.time.get_ticks() / 50)), octaves=1, persistance=0.5, lacunarity=2.0, repeatx=1024, repeaty=1024, base=0.0))

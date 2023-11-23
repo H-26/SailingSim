@@ -1,21 +1,22 @@
 # Imports
+import numpy as np
 import pygame, sys, threading
 from boat import Boat
-import map
+from map import Map
+import settings
 import wind
 
 # Setup
 pygame.init()
 
-scale = 0.1
+scale = settings.scale
 
 # Window initiation
-screenWidth = 900
-screenHeight = 700
-screen = pygame.display.set_mode((screenWidth, screenHeight), pygame.RESIZABLE)
+
+screen = pygame.display.set_mode((settings.screenWidth, settings.screenHeight), pygame.RESIZABLE)
 
 pygame.display.set_caption("SailingSim")
-icon = pygame.image.load("../Assets/Boat.png")  # To change Icon
+icon = pygame.image.load("Assets/Boat.png")  # To change Icon
 pygame.display.set_icon(icon)
 
 keys = pygame.key.get_pressed()
@@ -24,6 +25,7 @@ keys = pygame.key.get_pressed()
 def debugtick():
     if running:
         print("================================")
+        # print("Scale:", settings.scale)
         # print("Boat Angle to Wind:", player.boatAngleToWind)
         # print("Boat Angle:", player.angle)
         # print("Wind Angle:", player.wind[1])
@@ -32,8 +34,10 @@ def debugtick():
         # print("Tack:", player.tack)
         # print("Sail Angle to Wind:", player.sailAngleToWind)
         # print("Starboard Boat angle", (player.angle + player.wind[1]) % 360)
-        # print("Acceleration:", player.acceleration())
-        # print("Speed:", player.speed)
+        print("Acceleration:", player.acceleration())
+        print("Speed:", player.speed)
+        print("Speed X:", player.speedx)
+        print("Speed Y:", player.speedy)
         # print("Angular Velocity", player.angularVelocity)
         threading.Timer(1,debugtick).start()
 
@@ -50,10 +54,10 @@ def tick():
         threading.Timer(0.05, tick).start()
 
 # Player
-player = Boat(scale)
+player = Boat()
 
 # Map
-map = Map(scale, "Test Map")
+map = Map("Test Map")
 
 running = True
 
@@ -67,7 +71,7 @@ while running:
     for event in pygame.event.get():
         # Check if quit button pressed and quit
         if event.type == pygame.QUIT:
-            running = Fals
+            running = False
         else:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 5:
@@ -76,14 +80,20 @@ while running:
                     player.trimSail(1)
 
     keys = pygame.key.get_pressed()
+    screenSize = pygame.display.get_surface().get_size()
+
+    settings.scale = np.clip((settings.scale + (keys[pygame.K_EQUALS] - keys[pygame.K_MINUS])*0.01), 0, 1)
+
     screen.fill((41, 74, 143))
     # for posx in range(width):
     #     for posy in range(height):
     #         print(0, 0, int(127.5 + wind.localWind(posx / 2, posy / 2)[0] * 10))
     #         screen.set_at((posx, posy), (0, 0, int(127.5 + wind.localWind(posx / 2, posy / 2)[0] * 10)))
-    player.draw(screen)
+    player.draw(screen, screenSize)
+    map.draw(screen, screenSize)
     # Update screen
     pygame.display.update()
 
+# Quit
 pygame.quit()
 sys.exit()
