@@ -5,6 +5,7 @@ import json
 scale = 0.4
 screenWidth = 900
 screenHeight = 700
+centerBoat = False
 
 default = '{"wind":}'
 
