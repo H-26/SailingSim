@@ -30,8 +30,8 @@ screenSize = pygame.display.get_surface().get_size()
 def loadingScreen():
     timeElapsed = 0
     while loading:
-        screen.fill((0, 0, 0))
-        loadingMessage = "Joseph Henderson Presents Sailing Sim"  # Create a loading message
+        screen.fill((41, 74, 143))
+        loadingMessage = "Sailing Sim by Joseph Henderson"  # Create a loading message
         loadingText = font.render(loadingMessage, True, (255, 255, 255))
         screen.blit(loadingText, (screenSize[0] // 2 - loadingText.get_width() // 2, screenSize[1] // 2 - 65 // 2))
         pygame.display.update()
@@ -97,7 +97,7 @@ player = Boat()
 # Map
 map = Map("Test Map")
 
-windSurface = wind.createWindSurface(pygame.display)
+# windSurface = wind.createWindSurface(pygame.display)
 threading.Thread(target=tick).start()
 threading.Thread(target=debugtick).start()
 loading = False
@@ -144,11 +144,12 @@ while running:
 
     # Check if 0.05 seconds have passed since the last update
     if currentTime - lastUpdateTime >= 50:  # 0.05 seconds = 50 milliseconds
+        factor = currentTime - lastUpdateTime/50
         # Store the player's current position before updating
         prev_posx = player.posx
         prev_posy = player.posy
         # Update the player
-        player.update(keys)
+        player.update(keys, factor)
         # Create the HUD
         HUDText = ["X: {}, Y: {}".format(round(player.posx, 0), round(player.posy, 0)),
                    "Speed: {}".format(round(player.speed, 1)),
@@ -157,7 +158,7 @@ while running:
                    "Boat Angle: {}".format(round(player.angle, 1)),
                    "Boat Angle to Wind: {}".format(round(player.boatAngleToWind, 1)),
                    "Sail Angle to Wind: {}".format(round(player.sailAngleToWind, 1)),
-                   "Acceleration: {}".format(round(player.acceleration(), 1)), "Tack: {}".format(player.tack),
+                   "Acceleration: {}".format(round(player.acceleration, 1)), "Tack: {}".format(player.tack),
                    "FPS: {}".format(round(fps, 1))]
         HUD = []
         for line in HUDText:

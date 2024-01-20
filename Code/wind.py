@@ -9,20 +9,9 @@ import settings
 status = 0
 
 # accelerationFunction graph
-sailAngleToWind = np.array([-180, 0, 20, 35, 70, 180])
-acceleration = np.array([-0.3, -0.01, -0.01, 0.2, 0.3, -0.02])
+sailAngleToWind = np.array([-180, 0, 60, 90, 110, 180])
+acceleration = np.array([-1, 0, 1.1, 0.8, 1, 0])
 accelerationFunction = CubicHermiteSpline(x=sailAngleToWind, y=acceleration, dydx=np.zeros_like(acceleration))
-
-# maxSpeed graph
-boatAngleToWind = np.array([-180, 0, 30, 100, 180, 200])
-maxSpeed = np.array([0.5, 0.7, 0.7, 1, 0.75, 0.9])
-# y = np.array([1, 1, 1, 1, 1])
-maxSpeed = CubicHermiteSpline(x=boatAngleToWind, y=maxSpeed, dydx=np.zeros_like(maxSpeed))
-
-# minSpeed
-boatAngleToWind = np.array([-180, 90, 200])
-minSpeed = np.array([-0.9, 0, 0])
-minSpeed = CubicHermiteSpline(x=boatAngleToWind, y=minSpeed, dydx=np.zeros_like(minSpeed))
 
 # Generate perlin noise for wind
 mapSize = 2048
@@ -65,7 +54,7 @@ def draw(screen, screenSize, posx, posy):
     screen.blit(tempWindSurface, windSurfaceRect.move(-windSurfaceRect.width, windSurfaceRect.height))
 
 def localWind(posx, posy):
-    windspeed = 50
+    windspeed = 20
     return (windspeed * ((noise_map[int(posy) % mapSize][int(posx) % mapSize] + 1)) / 2), 0, windspeed
     # return(windspeed,0, windspeed)
     # print(noise.pnoise2(posx, float(posy), octaves=1, persistance=0.5, lacunarity=2.0, repeatx=1024, repeaty=1024, base=0.0))
