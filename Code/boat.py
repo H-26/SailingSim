@@ -22,10 +22,6 @@ class Boat(pygame.sprite.Sprite):
         self.hull = pygame.image.load("Assets/Boat.png").convert_alpha()
         self.portSail = pygame.image.load("Assets/portSail.png").convert_alpha()
         self.starboardSail = pygame.image.load("Assets/starboardSail.png").convert_alpha()
-        #Lower Resolution Assets
-        self.hull = pygame.transform.scale(self.hull, (self.hull.get_width()//2, self.hull.get_height()//2))
-        self.portSail = pygame.transform.scale(self.portSail, (self.portSail.get_width()//2, self.portSail.get_height()//2))
-        self.starboardSail = pygame.transform.scale(self.starboardSail, (self.starboardSail.get_width()//2, self.starboardSail.get_height()//2))
 
         self.hullRect = self.hull.get_rect()
         self.hullMask = pygame.mask.from_surface(self.hull)
@@ -40,10 +36,9 @@ class Boat(pygame.sprite.Sprite):
 
     def draw(self, screen, screenSize, interpolated_posx, interpolated_posy):
         temphull = self.hull.copy()
-        temphull = pygame.transform.scale(temphull, (self.hull.get_width() * 2, self.hull.get_height() * 2))
         self.hullRect = temphull.get_rect()
         # Draw sail on boat
-        tempsail = pygame.transform.scale(self.sail, (self.sail.get_width() * 2, self.sail.get_height() * 2))
+        tempsail = self.sail.copy()
         tempsail = pygame.transform.rotate(tempsail, self.sailAngle)
         self.sailRect = tempsail.get_rect()
         self.sailRect.center = self.hullRect.centerx, 270

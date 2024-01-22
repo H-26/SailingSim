@@ -19,7 +19,7 @@ scale = 2000
 
 noise_map = [[noise.pnoise2(x/scale, y/scale, octaves=6, persistence=0.5, lacunarity=2.0, repeatx=mapSize, repeaty=mapSize, base=random.randint(0,0)) for x in range(mapSize)] for y in range(mapSize)]
 
-def createWindSurface(display):
+def createWindSurface():
     width, height = mapSize, mapSize
     global windSurface
     # Create a new surface with the same dimensions as the screen

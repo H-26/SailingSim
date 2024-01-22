@@ -81,14 +81,6 @@ def debugtick():
 def tick():
     if running:
         global keys
-        # Get the current scale from the settings
-        # windSurface = drawWind(settings.scale)
-        # # Scroll the wind surface down by 1 pixel
-        # windSurface.scroll(dy=-1)
-        # # If the edge of the surface is reached
-        # # Scale the surface based on the scale setting
-        # windSurface = pygame.transform.scale(windSurface, (int(pygame.display.get_surface().get_size()[0] * scale),
-        #                                                      int(pygame.display.get_surface().get_size()[1] * scale)))
         time.sleep(0.05)
 
 # Player
@@ -97,8 +89,8 @@ player = Boat()
 # Map
 map = Map("Test Map")
 
-# windSurface = wind.createWindSurface(pygame.display)
-threading.Thread(target=tick).start()
+windSurface = wind.createWindSurface()
+# threading.Thread(target=tick).start()
 threading.Thread(target=debugtick).start()
 loading = False
 font = pygame.font.Font(None, 14)
@@ -176,7 +168,7 @@ while running:
     # Draw the screen
     screen.fill((41, 74, 143))
     width, height = pygame.display.get_surface().get_size()
-    # wind.draw(screen, screenSize, interpolated_posx, interpolated_posy)
+    wind.draw(screen, screenSize, interpolated_posx, interpolated_posy)
     player.draw(screen, screenSize, interpolated_posx, interpolated_posy)
     # map.draw(screen, screenSize, interpolated_posx, interpolated_posy)
     for textSurface in enumerate(HUD):
