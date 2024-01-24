@@ -2,10 +2,12 @@ import platform
 import os
 import json
 
-scale = 0.4
+centreScale = 0.1
+mapScale = 0.06
+scale = 0.1
 screenWidth = 900
 screenHeight = 700
-centerBoat = False
+centerBoat = True
 
 default = '{"wind":}'
 

@@ -22,6 +22,15 @@ class Boat(pygame.sprite.Sprite):
         self.hull = pygame.image.load("Assets/Boat.png").convert_alpha()
         self.portSail = pygame.image.load("Assets/portSail.png").convert_alpha()
         self.starboardSail = pygame.image.load("Assets/starboardSail.png").convert_alpha()
+        # Scale centre assets
+        self.centrehull = pygame.transform.scale(self.hull, ((self.hull.get_width() * settings.centreScale), (self.hull.get_height() * settings.centreScale)))
+        self.centreportSail = pygame.transform.scale(self.portSail, ((self.portSail.get_width() * settings.centreScale), (self.portSail.get_height() * settings.centreScale)))
+        self.centrestarboardSail = pygame.transform.scale(self.starboardSail, ((self.starboardSail.get_width() * settings.centreScale), (self.starboardSail.get_height() * settings.centreScale)))
+
+        # Scale map assets
+        self.maphull = pygame.transform.scale(self.hull, ((self.hull.get_width() * settings.mapScale), (self.hull.get_height() * settings.mapScale)))
+        self.mapportSail = pygame.transform.scale(self.portSail, ((self.portSail.get_width() * settings.mapScale), (self.portSail.get_height() * settings.mapScale)))
+        self.mapstarboardSail = pygame.transform.scale(self.starboardSail, ((self.starboardSail.get_width() * settings.mapScale), (self.starboardSail.get_height() * settings.mapScale)))
 
         self.hullRect = self.hull.get_rect()
         self.hullMask = pygame.mask.from_surface(self.hull)
@@ -29,23 +38,25 @@ class Boat(pygame.sprite.Sprite):
 
         self.sail = self.portSail
         self.sailAngle = 10
-        self.wind = wind.localWind(self.hullRect.centerx, self.hullRect.centery)
+        self.wind = wind.localWind(self.posx, self.posy)
         self.sailAngleToWind = (180 - self.angle % 180) - self.sailAngle - self.wind[1]
         self.boatAngleToWind = (180 - self.angle % 180) - self.wind[1]
     # Draw sail on boat and boat on screen
 
-    def draw(self, screen, screenSize, interpolated_posx, interpolated_posy):
-        temphull = self.hull.copy()
+    def draw(self, screen, screenSize, interpolated_posx, interpolated_posy, prevCenterboat):
+        if settings.centerBoat:
+            temphull = self.centrehull.copy()
+        else:
+            temphull = self.maphull.copy()
         self.hullRect = temphull.get_rect()
-        # Draw sail on boat
         tempsail = self.sail.copy()
+        # Draw sail on boat
         tempsail = pygame.transform.rotate(tempsail, self.sailAngle)
         self.sailRect = tempsail.get_rect()
-        self.sailRect.center = self.hullRect.centerx, 270
+        self.sailRect.center = self.hullRect.centerx, 270 * settings.scale
         temphull.blit(tempsail, self.sailRect)
         # Draw boat on screen
         temphull = pygame.transform.rotate(temphull, self.angle)
-        temphull = pygame.transform.scale(temphull, ((temphull.get_width()*settings.scale), (temphull.get_height()*settings.scale)))
         self.hullRect = temphull.get_rect()
         if settings.centerBoat:
             self.hullRect.center = screenSize[0]/2, screenSize[1]/2
@@ -79,25 +90,31 @@ class Boat(pygame.sprite.Sprite):
     # Change tack
     def changeTack(self):
         boatangle = (self.angle + self.wind[1]) % 360
+        if settings.centerBoat == True:
+            portSail = self.centreportSail.copy()
+            starboardSail = self.centrestarboardSail.copy()
+        else:
+            portSail = self.mapportSail.copy()
+            starboardSail = self.mapstarboardSail.copy()
         if 0 < (boatangle) < 160 and self.tack == "port":
-            self.sail = self.starboardSail.copy()
+            self.sail = starboardSail
             self.tack = "starboard"
             self.sailAngle = 350 - (self.sailAngle - 10)
         elif 200 < (boatangle) < 360 and self.tack == "starboard":
-            self.sail = self.portSail.copy()
+            self.sail = portSail
             self.tack = "port"
             self.sailAngle = 100 - (self.sailAngle - 260)
         elif self.sailAngleToWind > 0 and self.tack == "port":
-            self.sail = self.portSail.copy()
+            self.sail = portSail
         elif self.sailAngleToWind < 0 and self.tack == "port":
-            self.sail = self.starboardSail.copy()
+            self.sail = starboardSail
         elif self.sailAngleToWind > 0 and self.tack == "starboard":
-            self.sail = self.starboardSail.copy()
+            self.sail = starboardSail
         elif self.sailAngleToWind < 0 and self.tack == "starboard":
-            self.sail = self.portSail.copy()
+            self.sail = portSail
     # Calculate speed of boat using acceleration
     def calcSpeed(self):
-        self.wind = wind.localWind(self.hullRect.centerx, self.hullRect.centery)
+        self.wind = wind.localWind(self.posx, self.posy)
         if self.tack == "starboard":
             self.boatAngleToWind = (self.angle + self.wind[1]) % 360
             self.sailAngleToWind = self.boatAngleToWind - (100 - (self.sailAngle - 260))

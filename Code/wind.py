@@ -16,46 +16,50 @@ accelerationFunction = CubicHermiteSpline(x=sailAngleToWind, y=acceleration, dyd
 # Generate perlin noise for wind
 mapSize = 2048
 scale = 2000
+status = 0
+surfaceScale = 5
 
-noise_map = [[noise.pnoise2(x/scale, y/scale, octaves=6, persistence=0.5, lacunarity=2.0, repeatx=mapSize, repeaty=mapSize, base=random.randint(0,0)) for x in range(mapSize)] for y in range(mapSize)]
+noise_map = [[(1.0 + noise.pnoise2(x/scale, y/scale, octaves=6, persistence=0.5, lacunarity=2.0, repeatx=mapSize, repeaty=mapSize, base=0) * 2) for x in range(mapSize)] for y in range(mapSize)]
 
 def createWindSurface():
     width, height = mapSize, mapSize
-    global windSurface
+    global windSurface, centrewindSurface, mapwindSurface, status
     # Create a new surface with the same dimensions as the screen
     windSurface = pygame.Surface((width, height))
     for posx in range(width):
         for posy in range(height):
-            wind = localWind(posx, posy)
-            colour = np.clip(int(wind[0]/wind[2]*255), 0, 255)
+            colour = np.clip(int((noise_map[posx][posy]) * 128), 0, 255)
             windSurface.set_at((posx, posy), (0, 0, colour))
         status = round((posx / mapSize) * 100, 0)
+    centrewindSurface = pygame.transform.scale(windSurface.copy(), ((windSurface.get_width() * surfaceScale * settings.centreScale), (windSurface.get_height() * surfaceScale * settings.centreScale)))
+    mapwindSurface = pygame.transform.scale(windSurface.copy(), ((windSurface.get_width() * surfaceScale * settings.mapScale), (windSurface.get_height() * surfaceScale * settings.mapScale)))
 
-def draw(screen, screenSize, posx, posy):
-    tempWindSurface = windSurface.copy()
-    tempWindSurface = pygame.transform.smoothscale(tempWindSurface, ((windSurface.get_width() * 5 * settings.scale), (windSurface.get_height() * 5 * settings.scale)))
-    windSurfaceRect = tempWindSurface.get_rect()
+def draw(screen, screenSize, posx, posy, prevCenterboat):
     if settings.centerBoat:
+        tempWindSurface = centrewindSurface
+        windSurfaceRect = tempWindSurface.get_rect()
         windSurfaceRect.center = screenSize[0] / 2 - posx * settings.scale, screenSize[1] / 2 - posy * settings.scale
     else:
+        tempWindSurface = mapwindSurface
+        windSurfaceRect = tempWindSurface.get_rect()
         windSurfaceRect.center = (screenSize[0] / 2), (screenSize[1] / 2)
 
     screen.blit(tempWindSurface, windSurfaceRect)
-    tempWindSurface = pygame.transform.flip(tempWindSurface, True, False)
-    screen.blit(tempWindSurface, windSurfaceRect.move(windSurfaceRect.width, 0))
-    screen.blit(tempWindSurface, windSurfaceRect.move(-windSurfaceRect.width, 0))
-    tempWindSurface = pygame.transform.flip(tempWindSurface, False, True)
-    screen.blit(tempWindSurface, windSurfaceRect.move(0, windSurfaceRect.height))
-    screen.blit(tempWindSurface, windSurfaceRect.move(0, -windSurfaceRect.height))
-    tempWindSurface = pygame.transform.flip(tempWindSurface, True, False)
-    screen.blit(tempWindSurface, windSurfaceRect.move(windSurfaceRect.width, windSurfaceRect.height))
-    screen.blit(tempWindSurface, windSurfaceRect.move(-windSurfaceRect.width, -windSurfaceRect.height))
-    screen.blit(tempWindSurface, windSurfaceRect.move(windSurfaceRect.width, -windSurfaceRect.height))
-    screen.blit(tempWindSurface, windSurfaceRect.move(-windSurfaceRect.width, windSurfaceRect.height))
+    # tempWindSurface = pygame.transform.flip(tempWindSurface, True, False)
+    # screen.blit(tempWindSurface, windSurfaceRect.move(windSurfaceRect.width, 0))
+    # screen.blit(tempWindSurface, windSurfaceRect.move(-windSurfaceRect.width, 0))
+    # tempWindSurface = pygame.transform.flip(tempWindSurface, False, True)
+    # screen.blit(tempWindSurface, windSurfaceRect.move(0, windSurfaceRect.height))
+    # screen.blit(tempWindSurface, windSurfaceRect.move(0, -windSurfaceRect.height))
+    # tempWindSurface = pygame.transform.flip(tempWindSurface, True, False)
+    # screen.blit(tempWindSurface, windSurfaceRect.move(windSurfaceRect.width, windSurfaceRect.height))
+    # screen.blit(tempWindSurface, windSurfaceRect.move(-windSurfaceRect.width, -windSurfaceRect.height))
+    # screen.blit(tempWindSurface, windSurfaceRect.move(windSurfaceRect.width, -windSurfaceRect.height))
+    # screen.blit(tempWindSurface, windSurfaceRect.move(-windSurfaceRect.width, windSurfaceRect.height))
 
 def localWind(posx, posy):
-    windspeed = 20
-    return (windspeed * ((noise_map[int(posy) % mapSize][int(posx) % mapSize] + 1)) / 2), 0, windspeed
+    windspeed = 10
+    return (windspeed * (noise_map[int((posx % mapSize)/surfaceScale)][int((posy % mapSize)/surfaceScale)])), 0, windspeed
     # return(windspeed,0, windspeed)
     # print(noise.pnoise2(posx, float(posy), octaves=1, persistance=0.5, lacunarity=2.0, repeatx=1024, repeaty=1024, base=0.0))
     # return windspeed * int(noise.pnoise2(posx + ((math.sin(math.radians(windspeed)) * windspeed) * (pygame.time.get_ticks() / 50)), posy - ((math.sin(math.radians(windspeed)) * (0.1 * windspeed)) * (pygame.time.get_ticks() / 50)), octaves=1, persistance=0.5, lacunarity=2.0, repeatx=1024, repeaty=1024, base=0.0))
