@@ -60,15 +60,14 @@ keys = pygame.key.get_pressed()
 # Debug tick to print variables
 def debugtick():
     while running:
-        print("================================")
-        print("Scale:", settings.scale)
-        print("Center Boat:", settings.centerBoat)
-        print("Prev Center Boat:", prevCenterboat)
+        # print("================================")
+        # print("Scale:", settings.scale)
+        # print("Center Boat:", settings.centerBoat)
+        # print("Prev Center Boat:", prevCenterboat)
         # print("Boat Angle to Wind:", player.boatAngleToWind)
         # print("Boat Angle:", player.angle)
         # print("Wind Angle:", player.wind[1])
-        # print("Pos X:", player.posx)
-        # print("Pos Y:", player.posy)
+        # print("Pos X:", player.pos[0], "Pos Y:", player.pos[1])
         # print("Tack:", player.tack)
         # print("Sail Angle to Wind:", player.sailAngleToWind)
         # print("Starboard Boat angle", (player.angle + player.wind[1]) % 360)
@@ -77,7 +76,7 @@ def debugtick():
         # print("Speed X:", player.speedx)
         # print("Speed Y:", player.speedy)
         # print("Angular Velocity", player.angularVelocity)
-        # print("Wind Speed:", wind.localWind(player.posx, player.posy)[0])
+        # print("Wind Speed:", wind.localWind(player.pos, player.boat_posy)[0])
         time.sleep(1)
 
 # Tick to update at regular intervals regardless of framerate
@@ -97,16 +96,18 @@ loading = False
 font = pygame.font.Font(None, 14)
 lastFrameTime = pygame.time.get_ticks()
 lastUpdateTime = 50
-prev_posx = player.posx
-prev_posy = player.posy# Store the player's previous position
+prev_pos = player.pos
+# Store the player's previous position
 prevCenterboat = settings.centerBoat
 # threading.Thread(target=tick).start()
 threading.Thread(target=debugtick).start()
 
 # Game loop
 while running:
-    # Get the current time
+    # Set Variables
     currentTime = pygame.time.get_ticks()
+    screenSize = pygame.display.get_surface().get_size()
+    keys = pygame.key.get_pressed()
 
     # Check for events
     for event in pygame.event.get():
@@ -120,15 +121,12 @@ while running:
                     settings.scale = settings.centreScale
                 else:
                     settings.scale = settings.mapScale
+                    map.pos = np.dot(player.pos, settings.scale)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 5:
                 player.trimSail(-1)
             elif event.button == 4:
                 player.trimSail(1)
-
-    keys = pygame.key.get_pressed()
-    screenSize = pygame.display.get_surface().get_size()
-
     # settings.scale = np.clip((settings.scale + (keys[pygame.K_EQUALS] - keys[pygame.K_MINUS])*0.01), 0.06, 0.3)
 
     # Calculate the time difference
@@ -146,23 +144,26 @@ while running:
     if currentTime - lastUpdateTime >= 50:  # 0.05 seconds = 50 milliseconds
         factor = currentTime - lastUpdateTime/50
         # Store the player's current position before updating
-        prev_posx = player.posx
-        prev_posy = player.posy
+        prev_pos = player.pos
         # Update the player
-        player.update(keys, factor)
+        player.update(keys, factor, screenSize)
         # Create the HUD
-        HUDText = ["X: {}, Y: {}".format(round(player.posx, 0), round(player.posy, 0)),
-                   "Speed: {}".format(round(player.speed, 1)),
-                   "Wind Speed: {}".format(round(wind.localWind(player.posx, player.posy)[0], 1)),
-                   "Wind Angle: {}".format(round(wind.localWind(player.posx, player.posy)[1], 1)),
+        HUDText = ["X: {}, Y: {}".format(round(player.pos[0], 0), round(player.pos[1], 0)),
+                   "Speed: {}".format(round(player.speed[2], 1)),
+                   "Wind Speed: {}".format(round(wind.localWind(player.pos[0], player.pos[1])[0], 1)),
+                   "Wind Angle: {}".format(round(wind.localWind(player.pos[0], player.pos[1])[1], 1)),
                    "Boat Angle: {}".format(round(player.angle, 1)),
                    "Boat Angle to Wind: {}".format(round(player.boatAngleToWind, 1)),
                    "Sail Angle to Wind: {}".format(round(player.sailAngleToWind, 1)),
-                   "Acceleration: {}".format(round(player.acceleration, 1)), "Tack: {}".format(player.tack),
-                   "FPS: {}".format(round(fps, 1))]
+                   "Acceleration: {}".format(round(player.acceleration[2], 1)),
+                   "Tack: {}".format(player.tack),
+                   "FPS: {}".format(round(fps, 0))]
         HUD = []
         for line in HUDText:
             HUD.append(font.render(line, True, (255, 255, 255)))
+        if not settings.centerBoat:
+            map.pos[0] += (keys[pygame.K_RIGHT] - keys[pygame.K_LEFT]) * 20
+            map.pos[1] += (keys[pygame.K_DOWN] - keys[pygame.K_UP]) * 20
         # Update the last update time
         lastUpdateTime = currentTime
 
@@ -170,15 +171,14 @@ while running:
     t = (currentTime - lastUpdateTime) / 50.0
 
     # Calculate the interpolated position
-    interpolated_posx = prev_posx + t * (player.posx - prev_posx)
-    interpolated_posy = prev_posy + t * (player.posy - prev_posy)
+    interpolated_pos = np.array([int(prev_pos[0] + t * (player.pos[0] - prev_pos[0])), int(prev_pos[1] + t * (player.pos[1] - prev_pos[1]))])
 
     # Draw the screen
     screen.fill((41, 74, 143))
     width, height = pygame.display.get_surface().get_size()
-    wind.draw(screen, screenSize, interpolated_posx, interpolated_posy, prevCenterboat)
-    player.draw(screen, screenSize, interpolated_posx, interpolated_posy, prevCenterboat)
-    # map.draw(screen, screenSize, interpolated_posx, interpolated_posy, prevCenterboat)
+    wind.findTiles(screen, screenSize, interpolated_pos[0], interpolated_pos[1], map.pos[0], map.pos[1])
+    player.draw(screen, screenSize, interpolated_pos[0], interpolated_pos[1], map.pos[0], map.pos[1])
+    # map.draw(screen, screenSize, interpolated_pos[0], interpolated_pos[1], map.pos[0], map.pos[1])
     for textSurface in enumerate(HUD):
         screen.blit(textSurface[1], (0, screenSize[1] - ((textSurface[0] + 1) * 15)))
 

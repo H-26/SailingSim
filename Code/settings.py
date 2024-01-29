@@ -3,7 +3,7 @@ import os
 import json
 
 centreScale = 0.1
-mapScale = 0.06
+mapScale = 0.04
 scale = 0.1
 screenWidth = 900
 screenHeight = 700
