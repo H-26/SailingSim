@@ -149,13 +149,14 @@ while running:
         player.update(keys, factor, screenSize)
         # Create the HUD
         HUDText = ["X: {}, Y: {}".format(round(player.pos[0], 0), round(player.pos[1], 0)),
+                   "Relative X: {}, Relative Y: {}".format(round(wind.relative_posx, 0), round(wind.relative_posy, 0)),
                    "Speed: {}".format(round(player.speed[2], 1)),
                    "Wind Speed: {}".format(round(wind.localWind(player.pos[0], player.pos[1])[0], 1)),
                    "Wind Angle: {}".format(round(wind.localWind(player.pos[0], player.pos[1])[1], 1)),
                    "Boat Angle: {}".format(round(player.angle, 1)),
                    "Boat Angle to Wind: {}".format(round(player.boatAngleToWind, 1)),
                    "Sail Angle to Wind: {}".format(round(player.sailAngleToWind, 1)),
-                   "Acceleration: {}".format(round(player.acceleration[2], 1)),
+                   "Acceleration: {}".format(round(player.acceleration[2], 3)),
                    "Tack: {}".format(player.tack),
                    "FPS: {}".format(round(fps, 0))]
         HUD = []

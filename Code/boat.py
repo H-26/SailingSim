@@ -11,10 +11,10 @@ class Boat(pygame.sprite.Sprite):
         super().__init__()
         self.pos = np.array([0, 0])
         self.angle = 0
-        self.speed = np.array([0, 0, 0])
+        self.speed = np.array([0.0, 0.0, 0.0])
         self.angularAcceleration = 0
-        self.acceleration = np.array([0, 0, 0])
-        self.frictionCoefficient = 0.1
+        self.acceleration = np.array([0.0, 0.0, 0.0])
+        self.frictionCoefficient = 0.08
 
         #Load assets
         self.hull = pygame.image.load("Assets/Boat.png").convert_alpha()
@@ -124,8 +124,8 @@ class Boat(pygame.sprite.Sprite):
         # self.acceleration[0] = math.sin(math.radians(self.angle)) * acceleration_calculation - (self.frictionCoefficient * self.speed[0]) - math.sin(math.radians(self.wind[1])) * (0.1 * self.wind[0])
         # self.acceleration[1] = math.cos(math.radians(self.angle)) * acceleration_calculation - (self.frictionCoefficient * self.speed[1]) - math.cos(math.radians(self.wind[1])) * (0.1 * self.wind[0])
         # self.acceleration[2] = math.sqrt(self.acceleration[0] ** 2 + self.acceleration[1] ** 2)
-        self.acceleration[2] = acceleration_calculation - (self.frictionCoefficient * self.speed[2])
-        self.speed[2] = self.speed[2] + self.acceleration[2]
+        self.acceleration[2] = acceleration_calculation - (self.frictionCoefficient * self.speed[2]) - math.cos(math.radians(self.boatAngleToWind)) * (0.01 * self.wind[0])
+        self.speed[2] += self.acceleration[2]
         self.speed[0] = math.sin(math.radians(self.angle)) * self.speed[2]
         self.speed[1] = math.cos(math.radians(self.angle)) * self.speed[2]
         # self.speed[0] = self.speed[0] + self.acceleration[2] - math.sin(math.radians(self.wind[1])) * (0.1 * self.wind[0])
