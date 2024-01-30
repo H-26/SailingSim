@@ -16,6 +16,7 @@ mapSize = 2048
 scale = 2000
 status = 0
 surfaceScale = 10
+halfMapSizeScaled = (mapSize * surfaceScale) / 2
 
 noise_map = [[(1.0 + noise.pnoise2(x/scale, y/scale, octaves=6, persistence=0.5, lacunarity=2.0, repeatx=mapSize, repeaty=mapSize, base=0) * 3) for x in range(mapSize)] for y in range(mapSize)]
 
@@ -105,19 +106,6 @@ def draw(screen, screenSize, boat_posx, boat_posy, map_posx, map_posy):
         windSurfaceRect.center = screenSize[0] / 2 - map_posx, screenSize[1] / 2 - map_posy
         screen.blit(tempWindSurface, windSurfaceRect)
 
-    # screen.blit(tempWindSurface, windSurfaceRect)
-    # tempWindSurface = pygame.transform.flip(tempWindSurface, True, False)
-    # screen.blit(tempWindSurface, windSurfaceRect.move(windSurfaceRect.width, 0))
-    # screen.blit(tempWindSurface, windSurfaceRect.move(-windSurfaceRect.width, 0))
-    # tempWindSurface = pygame.transform.flip(tempWindSurface, False, True)
-    # screen.blit(tempWindSurface, windSurfaceRect.move(0, windSurfaceRect.height))
-    # screen.blit(tempWindSurface, windSurfaceRect.move(0, -windSurfaceRect.height))
-    # tempWindSurface = pygame.transform.flip(tempWindSurface, True, False)
-    # screen.blit(tempWindSurface, windSurfaceRect.move(windSurfaceRect.width, windSurfaceRect.height))
-    # screen.blit(tempWindSurface, windSurfaceRect.move(-windSurfaceRect.width, -windSurfaceRect.height))
-    # screen.blit(tempWindSurface, windSurfaceRect.move(windSurfaceRect.width, -windSurfaceRect.height))
-    # screen.blit(tempWindSurface, windSurfaceRect.move(-windSurfaceRect.width, windSurfaceRect.height))
-
 def localWind(posx, posy):
     windspeed = 10
     windangle = 0
@@ -125,12 +113,16 @@ def localWind(posx, posy):
     boat_grid = np.array([0, 0])
     if posx >= 0:
         boat_grid[0] = int(((posx / (surfaceScale * (mapSize / 2)) + 1) / 2))
+        relative_posx = int(((posx + halfMapSizeScaled) % (mapSize * surfaceScale)) / surfaceScale)
     else:
         boat_grid[0] = int(((posx / (surfaceScale * (mapSize / 2)) - 1) / 2))
+        relative_posx = int(mapSize - ((abs(posx) + halfMapSizeScaled) % (mapSize * surfaceScale)) / surfaceScale)
     if posy >= 0:
-        boat_grid[1] = int(((posy / (surfaceScale * (mapSize / 2))) + 1) / 2)
+        boat_grid[1] = int((posy / (surfaceScale * (mapSize / 2)) + 1) / 2)
+        relative_posy = int(((posy + halfMapSizeScaled) % (mapSize * surfaceScale)) / surfaceScale)
     else:
         boat_grid[1] = int(((posy / (surfaceScale * (mapSize / 2)) - 1) / 2))
+        relative_posy = int(mapSize - ((abs(posy) + halfMapSizeScaled) % (mapSize * surfaceScale)) / surfaceScale)
     # boat_grid = np.array([int(((posx / (surfaceScale * (mapSize/2)) + 1) / 2)), int(((posy / (surfaceScale * (mapSize/2))) + 1) / 2)])
     print(boat_grid)
     if boat_grid[0] % 2 != 0:
@@ -142,14 +134,18 @@ def localWind(posx, posy):
     flip_tuple = tuple(flip.tolist())  # Convert numpy array to tuple
     match flip_tuple:
         case (False, False):
-            return np.array([(windspeed * (noise_map[int((abs(posx) % (mapSize * surfaceScale)) / surfaceScale)][int((abs(posy) % (mapSize * surfaceScale)) / surfaceScale)])), windangle, windspeed])
+            # return np.array([(windspeed * (noise_map[int((abs(posx) % (mapSize * surfaceScale)) / surfaceScale)][int((abs(posy) % (mapSize * surfaceScale)) / surfaceScale)])), windangle, wind speed])
+            return np.array([windspeed * (noise_map[int(relative_posx)][int(relative_posy)]), windangle, windspeed])
             # return np.array([(windspeed * (noise_map[int((mapSize)/2 + posx/surfaceScale)][int((mapSize)/2 + posy/surfaceScale)])), windangle, windspeed])
         case (True, False):
-            return np.array([(windspeed * (noise_map[int(mapSize - ((abs(posx) % (mapSize * surfaceScale)) / surfaceScale))][int((abs(posy) % (mapSize * surfaceScale)) / surfaceScale)])), windangle, windspeed])
+            # return np.array([(windspeed * (noise_map[int(mapSize - ((abs(posx) % (mapSize * surfaceScale)) / surfaceScale))][int((abs(posy) % (mapSize * surfaceScale)) / surfaceScale)])), windangle, windspeed])
+            return np.array([windspeed * (noise_map[int(mapSize - relative_posx)][int(relative_posy)]), windangle, windspeed])
         case (False, True):
-            return np.array([(windspeed * (noise_map[int((abs(posx) % (mapSize * surfaceScale)) / surfaceScale)][int(mapSize - ((abs(posy) % (mapSize * surfaceScale)) / surfaceScale))])), windangle, windspeed])
+            # return np.array([(windspeed * (noise_map[int((abs(posx) % (mapSize * surfaceScale)) / surfaceScale)][int(mapSize - ((abs(posy) % (mapSize * surfaceScale)) / surfaceScale))])), windangle, windspeed])
+            return np.array([windspeed * (noise_map[int(relative_posx)][int(mapSize - relative_posy)]), windangle, windspeed])
         case (True, True):
-            return np.array([(windspeed * (noise_map[int(mapSize - ((abs(posx) % (mapSize * surfaceScale)) / surfaceScale))][int(mapSize - ((abs(posy) % (mapSize * surfaceScale)) / surfaceScale))])), windangle, windspeed])
+            # return np.array([(windspeed * (noise_map[int(mapSize - ((abs(posx) % (mapSize * surfaceScale)) / surfaceScale))][int(mapSize - ((abs(posy) % (mapSize * surfaceScale)) / surfaceScale))])), windangle, windspeed])
+            return np.array([windspeed * (noise_map[int(mapSize - relative_posx)][int(mapSize - relative_posy)]), windangle, windspeed])
     # return np.array([(windspeed * (noise_map[int((mapSize)/2 + posx/surfaceScale)][int((mapSize)/2 + posy/surfaceScale)])), windangle, windspeed])
     # return(windspeed,0, windspeed)
     # print(noise.pnoise2(pos, float(boat_posy), octaves=1, persistance=0.5, lacunarity=2.0, repeatx=1024, repeaty=1024, base=0.0))
