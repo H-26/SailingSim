@@ -30,18 +30,18 @@ def createWindSurface():
             # print(colour, noise_map[boat_posx][boat_posy])
             windSurface.set_at((posx, posy), (0, 0, colour))
         status = round((posx / mapSize) * 100, 0)
-    centrewindSurface = pygame.transform.scale(windSurface.copy(), ((mapSize * surfaceScale * settings.centreScale), (mapSize * surfaceScale * settings.centreScale)))
+    centrewindSurface = pygame.transform.scale(windSurface.copy(), ((mapSize * surfaceScale * settings.centre_scale), (mapSize * surfaceScale * settings.centre_scale)))
     centrewindSurfaceh = pygame.transform.flip(centrewindSurface, True, False)
     centrewindSurfacev = pygame.transform.flip(centrewindSurface, False, True)
     centrewindSurfacehv = pygame.transform.flip(centrewindSurface, True, True)
-    mapwindSurface = pygame.transform.scale(windSurface.copy(), ((mapSize * surfaceScale * settings.mapScale), (mapSize * surfaceScale * settings.mapScale)))
+    mapwindSurface = pygame.transform.scale(windSurface.copy(), ((mapSize * surfaceScale * settings.map_scale), (mapSize * surfaceScale * settings.map_scale)))
     mapwindSurfaceh = pygame.transform.flip(mapwindSurface, True, False)
     mapwindSurfacev = pygame.transform.flip(mapwindSurface, False, True)
     mapwindSurfacehv = pygame.transform.flip(mapwindSurface, True, True)
 
 def findTiles(screen, screenSize, boat_posx, boat_posy, map_posx, map_posy):
     flip = np.array([False, False])
-    if settings.centerBoat:
+    if settings.center_boat:
         #Floot Division doesn't work with negatives - casted as an int instead
         top_left_corner = np.array([boat_posx*settings.scale - screenSize[0] / 2, boat_posy*settings.scale - screenSize[1] / 2])
         bottom_right_corner = np.array([boat_posx*settings.scale + screenSize[0] / 2, boat_posy*settings.scale + screenSize[1] / 2])
@@ -66,7 +66,7 @@ def findTiles(screen, screenSize, boat_posx, boat_posy, map_posx, map_posy):
 
 def drawtile(screen, screenSize, x, y, flip, boat_posx, boat_posy, map_posx, map_posy):
     global centrewindSurface, centrewindSurfaceh, centrewindSurfacev, centrewindSurfacehv, mapwindSurface, mapwindSurfaceh, mapwindSurfacev, mapwindSurfacehv
-    if settings.centerBoat:
+    if settings.center_boat:
         flip_tuple = tuple(flip.tolist())  # Convert numpy array to tuple
         match flip_tuple:
             case (False, False):
@@ -96,7 +96,7 @@ def drawtile(screen, screenSize, x, y, flip, boat_posx, boat_posy, map_posx, map
 
 
 def draw(screen, screenSize, boat_posx, boat_posy, map_posx, map_posy):
-    if settings.centerBoat:
+    if settings.center_boat:
         tempWindSurface = centrewindSurface
         windSurfaceRect = tempWindSurface.get_rect()
         windSurfaceRect.center = screenSize[0] / 2 - boat_posx * settings.scale, screenSize[1] / 2 - boat_posy * settings.scale
@@ -124,7 +124,6 @@ def localWind(posx, posy):
     else:
         boat_grid[1] = int(((posy / (surfaceScale * (mapSize / 2)) - 1) / 2))
         relative_posy = int(mapSize - ((abs(posy) + halfMapSizeScaled) % (mapSize * surfaceScale)) / surfaceScale)
-    # boat_grid = np.array([int(((posx / (surfaceScale * (mapSize/2)) + 1) / 2)), int(((posy / (surfaceScale * (mapSize/2))) + 1) / 2)])
     if boat_grid[0] % 2 != 0:
         # flip horizontally
         flip[0]= True
@@ -134,20 +133,10 @@ def localWind(posx, posy):
     flip_tuple = tuple(flip.tolist())  # Convert numpy array to tuple
     match flip_tuple:
         case (False, False):
-            # return np.array([(windspeed * (noise_map[int((abs(posx) % (mapSize * surfaceScale)) / surfaceScale)][int((abs(posy) % (mapSize * surfaceScale)) / surfaceScale)])), windangle, wind speed])
             return np.array([windspeed * (noise_map[int(relative_posx) - 1][int(relative_posy) - 1]), windangle, windspeed])
-            # return np.array([(windspeed * (noise_map[int((mapSize)/2 + posx/surfaceScale)][int((mapSize)/2 + posy/surfaceScale)])), windangle, windspeed])
         case (True, False):
-            # return np.array([(windspeed * (noise_map[int(mapSize - ((abs(posx) % (mapSize * surfaceScale)) / surfaceScale))][int((abs(posy) % (mapSize * surfaceScale)) / surfaceScale)])), windangle, windspeed])
             return np.array([windspeed * (noise_map[int(mapSize - relative_posx) - 1][int(relative_posy) - 1]), windangle, windspeed])
         case (False, True):
-            # return np.array([(windspeed * (noise_map[int((abs(posx) % (mapSize * surfaceScale)) / surfaceScale)][int(mapSize - ((abs(posy) % (mapSize * surfaceScale)) / surfaceScale))])), windangle, windspeed])
             return np.array([windspeed * (noise_map[int(relative_posx) - 1][int(mapSize - relative_posy) - 1]), windangle, windspeed])
         case (True, True):
-            # return np.array([(windspeed * (noise_map[int(mapSize - ((abs(posx) % (mapSize * surfaceScale)) / surfaceScale))][int(mapSize - ((abs(posy) % (mapSize * surfaceScale)) / surfaceScale))])), windangle, windspeed])
             return np.array([windspeed * (noise_map[int(mapSize - relative_posx) - 1][int(mapSize - relative_posy) - 1]), windangle, windspeed])
-    # return np.array([(windspeed * (noise_map[int((mapSize)/2 + posx/surfaceScale)][int((mapSize)/2 + posy/surfaceScale)])), windangle, windspeed])
-    # return(windspeed,0, windspeed)
-    # print(noise.pnoise2(pos, float(boat_posy), octaves=1, persistance=0.5, lacunarity=2.0, repeatx=1024, repeaty=1024, base=0.0))
-    # return windspeed * int(noise.pnoise2(pos + ((math.sin(math.radians(windspeed)) * windspeed) * (pygame.time.get_ticks() / 50)), boat_posy - ((math.sin(math.radians(windspeed)) * (0.1 * windspeed)) * (pygame.time.get_ticks() / 50)), octaves=1, persistance=0.5, lacunarity=2.0, repeatx=1024, repeaty=1024, base=0.0))
-    # return (windspeed * (noise.pnoise2(pos, boat_posy - ((math.sin(math.radians(windspeed)) * (0.1 * windspeed)) * (pygame.time.get_ticks() / 50)), octaves=1, persistence=0.5, lacunarity=2.0, repeatx=1024, repeaty=1024, base=0)), 0)

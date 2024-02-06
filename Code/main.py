@@ -12,7 +12,7 @@ import wind
 pygame.init()
 
 # Window initiation
-screen = pygame.display.set_mode((settings.screenWidth, settings.screenHeight), pygame.RESIZABLE)
+screen = pygame.display.set_mode((settings.screen_width, settings.screen_height), pygame.RESIZABLE)
 
 pygame.display.set_caption("SailingSim")
 icon = pygame.image.load("Assets/Boat.png")  # To change Icon
@@ -25,7 +25,7 @@ pygame.event.pump()
 # Loading screen
 fontSize = 30
 font = pygame.font.Font(None, fontSize)
-screenSize = pygame.display.get_surface().get_size()
+screen_size = pygame.display.get_surface().get_size()
 
 def loadingScreen():
     timeElapsed = 0
@@ -33,24 +33,24 @@ def loadingScreen():
         screen.fill((41, 74, 143))
         loadingMessage = "Sailing Sim by Joseph Henderson"  # Create a loading message
         loadingText = font.render(loadingMessage, True, (255, 255, 255))
-        screen.blit(loadingText, (screenSize[0] // 2 - loadingText.get_width() // 2, screenSize[1] // 2 - 65 // 2 - fontSize))
+        screen.blit(loadingText, (screen_size[0] // 2 - loadingText.get_width() // 2, screen_size[1] // 2 - 65 // 2 - fontSize))
         loadingMessage2 = font.render("Loading... " + str(wind.status) + "%", True, (255, 255, 255))
-        screen.blit(loadingMessage2, (screenSize[0] // 2 - loadingMessage2.get_width() // 2, screenSize[1] // 2 + fontSize))
+        screen.blit(loadingMessage2, (screen_size[0] // 2 - loadingMessage2.get_width() // 2, screen_size[1] // 2 + fontSize))
         pygame.display.update()
         time.sleep(0.01)
-    # screen.fill((0, 0, 0))  # Fill the screen with black
-    # for i in range(0, 255, 5):
-    #     loadingMessage = "Joseph Henderson Presents:"  # Create a loading message
-    #     loadingText = font.render(loadingMessage, True, (i, i, i))  # Create a text surface
-    #     screen.blit(loadingText, (settings.screenWidth // 2 - loadingText.get_width() // 2, settings.screenHeight // 2 - 65 // 2))  # Blit the text surface onto the screen
-    #     pygame.display.update()  # Update the display
-    #     time.sleep(0.01)
-    # for i in range(0, 255, 5):
-    #     loadingMessage = "Sailing Sim"  # Create a loading message
-    #     loadingText = font.render(loadingMessage, True, (i, i, i))  # Create a text surface
-    #     screen.blit(loadingText, (settings.screenWidth // 2 - loadingText.get_width() // 2,settings.screenHeight // 2 - 25 // 2))  # Blit the text surface onto the screen
-    #     pygame.display.update() # Update the display
-    #     time.sleep(0.01)
+        # screen.fill((0, 0, 0))  # Fill the screen with black
+        # for i in range(0, 255, 5):
+        #     loadingMessage = "Joseph Henderson Presents:"  # Create a loading message
+        #     loadingText = font.render(loadingMessage, True, (i, i, i))  # Create a text surface
+        #     screen.blit(loadingText, (settings.screen_width // 2 - loadingText.get_width() // 2, settings.screen_height // 2 - 65 // 2))  # Blit the text surface onto the screen
+        #     pygame.display.update()  # Update the display
+        #     time.sleep(0.01)
+        # for i in range(0, 255, 5):
+        #     loadingMessage = "Sailing Sim"  # Create a loading message
+        #     loadingText = font.render(loadingMessage, True, (i, i, i))  # Create a text surface
+        #     screen.blit(loadingText, (settings.screen_width // 2 - loadingText.get_width() // 2,settings.screen_height // 2 - 25 // 2))  # Blit the text surface onto the screen
+        #     pygame.display.update() # Update the display
+        #     time.sleep(0.01)
     timeElapsed += 1
 
 threading.Thread(target=loadingScreen).start()
@@ -62,14 +62,14 @@ def debugtick():
     while running:
         # print("================================")
         # print("Scale:", settings.scale)
-        # print("Center Boat:", settings.centerBoat)
-        # print("Prev Center Boat:", prevCenterboat)
+        # print("Center Boat:", settings.center_boat)
+        # print("Prev Center Boat:", prev_centerboat)
         # print("Boat Angle to Wind:", player.boatAngleToWind)
         # print("Boat Angle:", player.angle)
         # print("Wind Angle:", player.wind[1])
         # print("Pos X:", player.pos[0], "Pos Y:", player.pos[1])
         # print("Tack:", player.tack)
-        # print("Sail Angle to Wind:", player.sailAngleToWind)
+        # print("Sail Angle to Wind:", player.sail_angle_to_wind)
         # print("Starboard Boat angle", (player.angle + player.wind[1]) % 360)
         # print("Acceleration:", player.acceleration())
         # print("Speed:a", player.speed)
@@ -94,19 +94,19 @@ map = Map("Test Map")
 windSurface = wind.createWindSurface()
 loading = False
 font = pygame.font.Font(None, 14)
-lastFrameTime = pygame.time.get_ticks()
-lastUpdateTime = 50
+last_frame_time = pygame.time.get_ticks()
+last_update_time = 50
 prev_pos = player.pos
 # Store the player's previous position
-prevCenterboat = settings.centerBoat
+prev_centerboat = settings.center_boat
 # threading.Thread(target=tick).start()
-threading.Thread(target=debugtick).start()
+# threading.Thread(target=debugtick).start()
 
 # Game loop
 while running:
     # Set Variables
-    currentTime = pygame.time.get_ticks()
-    screenSize = pygame.display.get_surface().get_size()
+    current_time = pygame.time.get_ticks()
+    screen_size = pygame.display.get_surface().get_size()
     keys = pygame.key.get_pressed()
 
     # Check for events
@@ -116,21 +116,22 @@ while running:
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_c:
-                settings.centerBoat = not settings.centerBoat  # Toggle centerBoat when 'C' key is pressed
-                if settings.centerBoat:
-                    settings.scale = settings.centreScale
+                settings.center_boat = not settings.center_boat  # Toggle center_boat when 'C' key is pressed
+                if settings.center_boat:
+                    settings.scale = settings.centre_scale
                 else:
-                    settings.scale = settings.mapScale
+                    settings.scale = settings.map_scale
                     map.pos = np.dot(player.pos, settings.scale)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 5:
                 player.trimSail(-1)
             elif event.button == 4:
                 player.trimSail(1)
+    # Previous way to change the scale, removed to improve performance
     # settings.scale = np.clip((settings.scale + (keys[pygame.K_EQUALS] - keys[pygame.K_MINUS])*0.01), 0.06, 0.3)
 
     # Calculate the time difference
-    dt = (currentTime - lastFrameTime) / 1000.0  # Convert to seconds
+    dt = (current_time - last_frame_time) / 1000.0  # Convert to seconds
 
     # Calculate the FPS
     if dt > 0:
@@ -138,38 +139,38 @@ while running:
     else:
         fps = 0
 
-    lastFrameTime = currentTime
+    last_frame_time = current_time
 
     # Check if 0.05 seconds have passed since the last update
-    if currentTime - lastUpdateTime >= 50:  # 0.05 seconds = 50 milliseconds
-        factor = currentTime - lastUpdateTime/50
+    if current_time - last_update_time >= 50:  # 0.05 seconds = 50 milliseconds
+        factor = current_time - last_update_time / 50
         # Store the player's current position before updating
         prev_pos = player.pos
         # Update the player
-        player.update(keys, factor, screenSize)
-        # Create the HUD
-        HUDText = ["X: {}, Y: {}".format(round(player.pos[0], 0), round(player.pos[1], 0)),
+        player.update(keys, factor, screen_size)
+        # Create the hud
+        hud_text = ["X: {}, Y: {}".format(round(player.pos[0], 0), round(player.pos[1], 0)),
                    "Relative X: {}, Relative Y: {}".format(round(wind.relative_posx, 0), round(wind.relative_posy, 0)),
                    "Speed: {}".format(round(player.speed[2], 1)),
                    "Wind Speed: {}".format(round(wind.localWind(player.pos[0], player.pos[1])[0], 1)),
                    "Wind Angle: {}".format(round(wind.localWind(player.pos[0], player.pos[1])[1], 1)),
                    "Boat Angle: {}".format(round(player.angle, 1)),
                    "Boat Angle to Wind: {}".format(round(player.boatAngleToWind, 1)),
-                   "Sail Angle to Wind: {}".format(round(player.sailAngleToWind, 1)),
+                   "Sail Angle to Wind: {}".format(round(player.sail_angle_to_wind, 1)),
                    "Acceleration: {}".format(round(player.acceleration[2], 3)),
                    "Tack: {}".format(player.tack),
                    "FPS: {}".format(round(fps, 0))]
-        HUD = []
-        for line in HUDText:
-            HUD.append(font.render(line, True, (255, 255, 255)))
-        if not settings.centerBoat:
+        hud = []
+        for line in hud_text:
+            hud.append(font.render(line, True, (255, 255, 255)))
+        if not settings.center_boat:
             map.pos[0] += (keys[pygame.K_RIGHT] - keys[pygame.K_LEFT]) * 20
             map.pos[1] += (keys[pygame.K_DOWN] - keys[pygame.K_UP]) * 20
         # Update the last update time
-        lastUpdateTime = currentTime
+        last_update_time = current_time
 
     # Calculate the interpolation factor
-    t = (currentTime - lastUpdateTime) / 50.0
+    t = (current_time - last_update_time) / 50.0
 
     # Calculate the interpolated position
     interpolated_pos = np.array([int(prev_pos[0] + t * (player.pos[0] - prev_pos[0])), int(prev_pos[1] + t * (player.pos[1] - prev_pos[1]))])
@@ -177,16 +178,16 @@ while running:
     # Draw the screen
     screen.fill((41, 74, 143))
     width, height = pygame.display.get_surface().get_size()
-    wind.findTiles(screen, screenSize, interpolated_pos[0], interpolated_pos[1], map.pos[0], map.pos[1])
-    player.draw(screen, screenSize, interpolated_pos[0], interpolated_pos[1], map.pos[0], map.pos[1])
-    # map.draw(screen, screenSize, interpolated_pos[0], interpolated_pos[1], map.pos[0], map.pos[1])
-    for textSurface in enumerate(HUD):
-        screen.blit(textSurface[1], (0, screenSize[1] - ((textSurface[0] + 1) * 15)))
+    wind.findTiles(screen, screen_size, interpolated_pos[0], interpolated_pos[1], map.pos[0], map.pos[1])
+    player.draw(screen, screen_size, interpolated_pos[0], interpolated_pos[1], map.pos[0], map.pos[1])
+    # map.draw(screen, screen_size, interpolated_pos[0], interpolated_pos[1], map.pos[0], map.pos[1])
+    for text_surface in enumerate(hud):
+        screen.blit(text_surface[1], (0, screen_size[1] - ((text_surface[0] + 1) * 15)))
 
     # Update screen
     pygame.display.update()
 
-    prevCenterboat = settings.centerBoat
+    prev_centerboat = settings.center_boat
 
 # Quit
 pygame.quit()

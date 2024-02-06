@@ -1,15 +1,18 @@
-import platform
-import os
-import json
-
-centreScale = 0.1
-mapScale = 0.04
+#Settings
+centre_scale = 0.1
+map_scale = 0.04
 scale = 0.1
-screenWidth = 900
-screenHeight = 700
-centerBoat = True
+screen_width = 900
+screen_height = 700
+center_boat = True
 
-default = '{"wind":}'
+# Future plan to store settings in a json file
+
+# import platform
+# import os
+# import json
+
+# default = '{"wind":}'
 
 # def checkSettings(json):
 #     if json == default
