@@ -10,13 +10,13 @@ class Map(pygame.sprite.Sprite):
         self.mapimage = pygame.transform.scale(self.image.copy(), ((self.image.get_width() * 5 * settings.map_scale), (self.image.get_height() * 5 * settings.map_scale)))
         self.pos = np.array([0, 0])
         # Function draw the map
-    def draw(self, screen, screenSize, boatposx, boatposy, mapposx, mapposy):
+    def draw(self, screen, screen_size, boat_posx, boat_posy, map_posx, map_posy):
         if settings.center_boat:
-            tempimage = self.centreimage
-            maprect = tempimage.get_rect()
-            maprect.center = screenSize[0]/2 - boatposx*settings.scale, screenSize[1]/2 - boatposy*settings.scale
+            temp_image = self.centreimage
+            map_rect = temp_image.get_rect()
+            map_rect.center = screen_size[0] / 2 - boat_posx * settings.scale, screen_size[1] / 2 - boat_posy * settings.scale
         else:
-            tempimage = self.mapimage
-            maprect = tempimage.get_rect()
-            maprect.center = screenSize[0]/2 - mapposx, screenSize[1]/2 - mapposy
-        screen.blit(tempimage, maprect)
+            temp_image = self.mapimage
+            map_rect = temp_image.get_rect()
+            map_rect.center = screen_size[0] / 2 - map_posx, screen_size[1] / 2 - map_posy
+        screen.blit(temp_image, map_rect)

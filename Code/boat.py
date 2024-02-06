@@ -20,8 +20,9 @@ class Boat(pygame.sprite.Sprite):
 
         #Load assets
         self.hull = pygame.image.load("Assets/Boat.png").convert_alpha()
-        self.port_sail = pygame.image.load("Assets/port_sail.png").convert_alpha()
-        self.starboard_sail = pygame.image.load("Assets/starboard_sail.png").convert_alpha()
+        self.port_sail = pygame.image.load("Assets/portSail.png").convert_alpha()
+        self.port_sail = pygame.image.load("Assets/portSail.png").convert_alpha()
+        self.starboard_sail = pygame.image.load("Assets/starboardSail.png").convert_alpha()
         # Scale centre assets
         self.centre_hull = pygame.transform.smoothscale(self.hull, ((self.hull.get_width() * settings.centre_scale), (self.hull.get_height() * settings.centre_scale)))
         self.centre_port_sail = pygame.transform.smoothscale(self.port_sail, ((self.port_sail.get_width() * settings.centre_scale), (self.port_sail.get_height() * settings.centre_scale)))
@@ -123,7 +124,7 @@ class Boat(pygame.sprite.Sprite):
             self.boat_angle_to_wind = (360 - self.angle - self.wind[1]) % 360
             self.sail_angle_to_wind = self.boat_angle_to_wind - self.sail_angle
         #Calculate acceleration for x, y and total. Use acceleration function to calculate acceleration, multiply by windspeed and subtract friction
-        acceleration_calculation = wind.accelerationFunction(self.sail_angle_to_wind) * self.wind[0] - (abs(self.angular_acceleration) * 0.01)
+        acceleration_calculation = wind.acceleration_function(self.sail_angle_to_wind) * self.wind[0] - (abs(self.angular_acceleration) * 0.01)
         # Removed previous acceleration calculation for x and y so boat always moves in direction of travel
         # self.acceleration[0] = math.sin(math.radians(self.angle)) * acceleration_calculation - (self.friction_coefficient * self.speed[0]) - math.sin(math.radians(self.wind[1])) * (0.1 * self.wind[0])
         # self.acceleration[2] = math.sqrt(self.acceleration[0] ** 2 + self.acceleration[1] ** 2)

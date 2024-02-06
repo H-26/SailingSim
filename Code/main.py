@@ -91,7 +91,7 @@ player = Boat()
 # Map
 map = Map("Test Map")
 
-windSurface = wind.createWindSurface()
+wind_surface = wind.createWindSurface()
 loading = False
 font = pygame.font.Font(None, 14)
 last_frame_time = pygame.time.get_ticks()
@@ -155,7 +155,7 @@ while running:
                    "Wind Speed: {}".format(round(wind.localWind(player.pos[0], player.pos[1])[0], 1)),
                    "Wind Angle: {}".format(round(wind.localWind(player.pos[0], player.pos[1])[1], 1)),
                    "Boat Angle: {}".format(round(player.angle, 1)),
-                   "Boat Angle to Wind: {}".format(round(player.boatAngleToWind, 1)),
+                   "Boat Angle to Wind: {}".format(round(player.boat_angle_to_wind, 1)),
                    "Sail Angle to Wind: {}".format(round(player.sail_angle_to_wind, 1)),
                    "Acceleration: {}".format(round(player.acceleration[2], 3)),
                    "Tack: {}".format(player.tack),
