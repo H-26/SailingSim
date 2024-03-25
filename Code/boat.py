@@ -2,7 +2,7 @@
 
 import pygame
 import math
-import wind
+from wind import wind
 import numpy as np
 import settings
 
@@ -14,15 +14,15 @@ class Boat(pygame.sprite.Sprite):
         self.pos = np.array([0, 0])
         self.angle = 0
         self.speed = np.array([0.0, 0.0, 0.0])
-        self.angular_acceleration = 0
+        self.angular_velocity = 0
         self.acceleration = np.array([0.0, 0.0, 0.0])
         self.friction_coefficient = 0.08
 
         #Load assets
         self.hull = pygame.image.load("Assets/Boat.png").convert_alpha()
         self.port_sail = pygame.image.load("Assets/portSail.png").convert_alpha()
-        self.port_sail = pygame.image.load("Assets/portSail.png").convert_alpha()
         self.starboard_sail = pygame.image.load("Assets/starboardSail.png").convert_alpha()
+        self.windpointer = pygame.image.load("Assets/WindPointer.png").convert_alpha()
         # Scale centre assets
         self.centre_hull = pygame.transform.smoothscale(self.hull, ((self.hull.get_width() * settings.centre_scale), (self.hull.get_height() * settings.centre_scale)))
         self.centre_port_sail = pygame.transform.smoothscale(self.port_sail, ((self.port_sail.get_width() * settings.centre_scale), (self.port_sail.get_height() * settings.centre_scale)))
@@ -33,10 +33,11 @@ class Boat(pygame.sprite.Sprite):
         self.map_starboard_sail = pygame.transform.smoothscale(self.starboard_sail, ((self.starboard_sail.get_width() * settings.map_scale), (self.starboard_sail.get_height() * settings.map_scale)))
 
         self.hull_rect = self.hull.get_rect()
+
         # Future idea to make a mask for collision detection
         # self.hullMask = pygame.mask.from_surface(self.hull)
 
-        #Wind related variables
+        # Wind related variables
         self.tack = "port"
         self.sail = self.centre_port_sail
         self.sail_angle = 10
@@ -46,6 +47,7 @@ class Boat(pygame.sprite.Sprite):
 
     # Draw sail on boat and boat on screen
     def draw(self, screen, screen_size, interpolated_posx, interpolated_posy, map_posx, map_posy):
+        # Select hull and sail scale based on view
         if settings.center_boat:
             temp_hull = self.centre_hull.copy()
         else:
@@ -65,17 +67,31 @@ class Boat(pygame.sprite.Sprite):
         else:
             self.hull_rect.center = screen_size[0] / 2 + interpolated_posx * settings.scale - map_posx, screen_size[1] / 2 + interpolated_posy * settings.scale - map_posy
         screen.blit(temp_hull, self.hull_rect)
+
+    # Draw pointers on screen
+    def drawPointers(self, screen, screen_size, interpolated_posx, interpolated_posy, map_posx, map_posy):
+        # Draw wind pointer
+        windpointer = self.windpointer.copy()
+        windpointer = pygame.transform.scale(windpointer, (int(windpointer.get_width() * settings.scale * 0.15 * self.wind[0]), int(windpointer.get_height() * settings.scale * 0.15 * self.wind[0])))
+        windpointer = pygame.transform.rotate(windpointer, -self.wind[1])
+        windpointerRect = windpointer.get_rect()
+        if settings.center_boat:
+            windpointerRect.center = screen_size[0] / 2, screen_size[1] / 2
+        else:
+            windpointerRect.center = screen_size[0] / 2 + interpolated_posx * settings.scale - map_posx, screen_size[1] / 2 + interpolated_posy * settings.scale - map_posy
+        screen.blit(windpointer, windpointerRect)
+
     # Turn boat
     def steer(self, keys):
         angularvelocitysteps = 100
         if keys != 0:
-            self.angular_acceleration = np.clip(self.angular_acceleration + (keys / angularvelocitysteps), -0.3, 0.3)
+            self.angular_velocity = np.clip(self.angular_velocity + (keys / angularvelocitysteps), -0.3, 0.3)
         else:
-            if self.angular_acceleration > 0:
-                self.angular_acceleration = self.angular_acceleration - (self.angular_acceleration / 3)
-            elif self.angular_acceleration < 0:
-                self.angular_acceleration = self.angular_acceleration + (-self.angular_acceleration / 3)
-        self.angle = (self.angle + np.clip((self.angular_acceleration * 0.6 * self.speed[2]), -3, 3)) % 360
+            if self.angular_velocity > 0:
+                self.angular_velocity = self.angular_velocity - (self.angular_velocity * 0.3)
+            elif self.angular_velocity < 0:
+                self.angular_velocity = self.angular_velocity + (-self.angular_velocity * 0.3)
+        self.angle = (self.angle + np.clip((self.angular_velocity * 0.6 * self.speed[2]), -3, 3)) % 360
     # Rotate sail on boat
     def trimSail(self, angle):
         if self.sail_angle_to_wind > 0 or angle > 0:
@@ -124,7 +140,7 @@ class Boat(pygame.sprite.Sprite):
             self.boat_angle_to_wind = (360 - self.angle - self.wind[1]) % 360
             self.sail_angle_to_wind = self.boat_angle_to_wind - self.sail_angle
         #Calculate acceleration for x, y and total. Use acceleration function to calculate acceleration, multiply by windspeed and subtract friction
-        acceleration_calculation = wind.acceleration_function(self.sail_angle_to_wind) * self.wind[0] - (abs(self.angular_acceleration) * 0.01)
+        acceleration_calculation = wind.accelerationFunction(self.sail_angle_to_wind) * self.wind[0] - (abs(self.angular_velocity) * 0.01)
         # Removed previous acceleration calculation for x and y so boat always moves in direction of travel
         # self.acceleration[0] = math.sin(math.radians(self.angle)) * acceleration_calculation - (self.friction_coefficient * self.speed[0]) - math.sin(math.radians(self.wind[1])) * (0.1 * self.wind[0])
         # self.acceleration[2] = math.sqrt(self.acceleration[0] ** 2 + self.acceleration[1] ** 2)
@@ -141,5 +157,5 @@ class Boat(pygame.sprite.Sprite):
         self.move()
     # Move boat according to speed
     def move(self):
-        self.pos[0] -= self.speed[0]
-        self.pos[1] -= self.speed[1]
+        self.pos[0] -= self.speed[0] * settings.scale * 10
+        self.pos[1] -= self.speed[1] * settings.scale * 10
