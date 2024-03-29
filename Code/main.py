@@ -50,11 +50,11 @@ def loadingScreen():
         screen.fill((0, 0, 0))
         time.sleep(0.01)
     for i in range (0, 255, 5):
-        screen.fill((i/225 * 41, i/225 * 74, i/225 * 143))
+        screen.fill((i/225 * 30, i/225 * 120, i/225 * 200))
         pygame.display.update()
         time.sleep(0.01)
     while loading:
-        screen.fill((41, 74, 143))
+        screen.fill((30, 120, 200))
         loadingMessage = "Sailing Sim"  # Create a loading message
         loadingText = font.render(loadingMessage, True, (255, 255, 255))
         screen.blit(loadingText, (screen_size[0] // 2 - loadingText.get_width() // 2, screen_size[1] // 2 - 65 // 2 - fontSize))
@@ -133,6 +133,7 @@ while running:
                 else:
                     settings.scale = settings.map_scale
                     map.pos = np.dot(player.pos, settings.scale)
+                    prev_map_pos = map.pos
             if event.key == pygame.K_F3:
                 debug = not debug
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -203,7 +204,7 @@ while running:
     interpolated_map_pos = np.array([int(prev_map_pos[0] + t * (map.pos[0] - prev_map_pos[0])), int(prev_map_pos[1] + t * (map.pos[1] - prev_map_pos[1]))])
 
     # Draw the screen
-    screen.fill((41, 74, 143))
+    screen.fill((30, 120, 200))
     width, height = pygame.display.get_surface().get_size()
     wind.findTiles(screen, screen_size, interpolated_pos[0], interpolated_pos[1], interpolated_map_pos[0], interpolated_map_pos[1])
     player.draw(screen, screen_size, interpolated_pos[0], interpolated_pos[1], interpolated_map_pos[0], interpolated_map_pos[1])
