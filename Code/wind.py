@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 from scipy.interpolate import CubicHermiteSpline
 import noise
@@ -14,9 +16,10 @@ class Wind:
         self.surface_scale = 10
         self.half_map_size_scaled = (self.map_size * self.surface_scale) / 2
         # Create Noise map
-        self.noise_map = [[(1.0 + noise.pnoise2(x / self.scale, y / self.scale, octaves=6, persistence=0.5, lacunarity=2.0, repeatx=self.map_size, repeaty=self.map_size, base=0) * 2) for x in range(self.map_size)] for y in range(self.map_size)]
-        self.shift_map = [[(1.0 + noise.pnoise2(x / self.scale, y / self.scale, octaves=6, persistence=0.5, lacunarity=2.0, repeatx=self.map_size, repeaty=self.map_size, base=5) * 2) for x in range(self.map_size)] for y in range(self.map_size)]
-        self.shift_map = (np.array(self.shift_map)-1) * 20
+        randbase = random.randint(-250,250)
+        self.noise_map = [[(1.0 + noise.pnoise2(x / self.scale, y / self.scale, octaves=6, persistence=0.5, lacunarity=2.0, base=randbase) * 2) for x in range(self.map_size)] for y in range(self.map_size)]
+        randbase = random.randint(-250,250)
+        self.shift_map = [[(noise.pnoise2(x / self.scale, y / self.scale, octaves=6, persistence=0.5, lacunarity=2.0, base=randbase) * 40) for x in range(self.map_size)] for y in range(self.map_size)]
         #Create acceleration function using CubicHermiteSpline to interpolate values
         sail_angle_to_wind = np.array([-180, 0, 35, 60, 90, 110, 180])
         acceleration = np.array([-0.8, 0, 0.5, 0.9, 0.6, 0.8, 0])
@@ -35,8 +38,9 @@ class Wind:
         # Draw noise map onto wind surface
         for posx in range(self.map_size):
             for posy in range(self.map_size):
-                colour = np.clip(int((1 + (1 - self.noise_map[posx][posy])) * 128), 0, 255)
-                self.wind_surface.set_at((posx, posy), (0, 0, colour))
+                colour = np.clip(int((((1 + (1 - self.noise_map[posx][posy])) * settings.windspeed)/11) * 100), 0, 255)
+                # self.wind_surface.set_at((posx, posy), (0, 0, colour))
+                self.wind_surface.set_at((posx, posy), ((colour * 0.15), (colour * 0.6), colour))
             self.status = round((posx / self.map_size) * 100, 0)
         # Scale wind surface to different sizes and flip for different grids for connected tiles
         self.centre_wind_surface = pygame.transform.scale(self.wind_surface.copy(), ((self.map_size * self.surface_scale * settings.centre_scale), (self.map_size * self.surface_scale * settings.centre_scale)))
@@ -55,13 +59,27 @@ class Wind:
         if settings.center_boat:
             top_left_corner = np.array([boat_posx*settings.scale - screenSize[0] / 2, boat_posy*settings.scale - screenSize[1] / 2])
             bottom_right_corner = np.array([boat_posx*settings.scale + screenSize[0] / 2, boat_posy*settings.scale + screenSize[1] / 2])
-            top_left_grid = np.array([int(top_left_corner[0] / (self.map_size * self.surface_scale * settings.scale)) - 1, int(top_left_corner[1] / (self.map_size * self.surface_scale * settings.scale)) - 1])
-            bottom_right_grid = np.array([int(bottom_right_corner[0] / (self.map_size * self.surface_scale * settings.scale)) + 1, int(bottom_right_corner[1] / (self.map_size * self.surface_scale * settings.scale)) + 1])
+            posx = boat_posx
+            posy = boat_posy
         else:
             top_left_corner = np.array([map_posx - screenSize[0] / 2, map_posy - screenSize[1] / 2])
             bottom_right_corner = np.array([map_posx + screenSize[0] / 2, map_posy + screenSize[1] / 2])
-            top_left_grid = np.array([int(top_left_corner[0] / (self.map_size * self.surface_scale * settings.scale)) - 1, int(top_left_corner[1] / (self.map_size * self.surface_scale * settings.scale)) - 1])
-            bottom_right_grid = np.array([int(bottom_right_corner[0] / (self.map_size * self.surface_scale * settings.scale)) + 1, int(bottom_right_corner[1] / (self.map_size * self.surface_scale * settings.scale)) + 1])
+            posx = map_posx
+            posy = map_posy
+        top_left_grid = np.array([0, 0])
+        bottom_right_grid = np.array([0, 0])
+        for pos in enumerate([posx, posy]):
+            if pos[1] > self.map_size * self.surface_scale * settings.scale:
+                top_left_grid[pos[0]] = int(top_left_corner[pos[0]] / (self.map_size * self.surface_scale * settings.scale))
+                bottom_right_grid[pos[0]] = int(bottom_right_corner[pos[0]] / (self.map_size * self.surface_scale * settings.scale)) + 1
+            elif pos[1] < -(self.map_size * self.surface_scale * settings.scale):
+                top_left_grid[pos[0]] = int(top_left_corner[pos[0]] / (self.map_size * self.surface_scale * settings.scale)) - 1
+                bottom_right_grid[pos[0]] = int(bottom_right_corner[pos[0]] / (self.map_size * self.surface_scale * settings.scale))
+            else:
+                top_left_grid[pos[0]] = int(top_left_corner[pos[0]] / (self.map_size * self.surface_scale * settings.scale)) - 1
+                bottom_right_grid[pos[0]] = int(bottom_right_corner[pos[0]] / (self.map_size * self.surface_scale * settings.scale)) + 1
+        # top_left_grid = np.array([int(top_left_corner[0] / (self.map_size * self.surface_scale * settings.scale)) - 1, int(top_left_corner[1] / (self.map_size * self.surface_scale * settings.scale)) - 1])
+        # bottom_right_grid = np.array([int(bottom_right_corner[0] / (self.map_size * self.surface_scale * settings.scale)) + 1, int(bottom_right_corner[1] / (self.map_size * self.surface_scale * settings.scale)) + 1])
         # Find the flip of the wind tiles based on the grid position and draw the tiles
         for x in range(top_left_grid[0], bottom_right_grid[0]+1):
             flip[0] = False
@@ -106,7 +124,6 @@ class Wind:
         screen.blit(temp_wind_surface, windSurfaceRect)
 
     def localWind(self, posx, posy):
-        windspeed = 10
         windangle = 0
         flip = np.array([False, False])
         boat_grid = np.array([0, 0])
@@ -130,12 +147,12 @@ class Wind:
         flip_tuple = tuple(flip.tolist())
         match flip_tuple:
             case (False, False):
-                return np.array([windspeed * (self.noise_map[int(self.relative_posx)][int(self.relative_posy)]), windangle + self.shift_map[int(self.relative_posx)][int(self.relative_posy)], windspeed])
+                return np.array([settings.windspeed * (self.noise_map[int(self.relative_posx)][int(self.relative_posy)]), windangle + self.shift_map[int(self.relative_posx)][int(self.relative_posy)], settings.windspeed])
             case (True, False):
-                return np.array([windspeed * (self.noise_map[int(map_sizesub - self.relative_posx)][int(self.relative_posy)]), windangle + self.shift_map[int(map_sizesub - self.relative_posx)][int(self.relative_posy)], windspeed])
+                return np.array([settings.windspeed * (self.noise_map[int(map_sizesub - self.relative_posx)][int(self.relative_posy)]), windangle + self.shift_map[int(map_sizesub - self.relative_posx)][int(self.relative_posy)], settings.windspeed])
             case (False, True):
-                return np.array([windspeed * (self.noise_map[int(self.relative_posx)][int(map_sizesub - self.relative_posy)]), windangle + self.shift_map[int(self.relative_posx)][int(map_sizesub - self.relative_posy)], windspeed])
+                return np.array([settings.windspeed * (self.noise_map[int(self.relative_posx)][int(map_sizesub - self.relative_posy)]), windangle + self.shift_map[int(self.relative_posx)][int(map_sizesub - self.relative_posy)], settings.windspeed])
             case (True, True):
-                return np.array([windspeed * (self.noise_map[int(map_sizesub - self.relative_posx)][int(map_sizesub - self.relative_posy)]), windangle + self.shift_map[int(map_sizesub - self.relative_posx)][int(map_sizesub - self.relative_posy)], windspeed])
+                return np.array([settings.windspeed * (self.noise_map[int(map_sizesub - self.relative_posx)][int(map_sizesub - self.relative_posy)]), windangle + self.shift_map[int(map_sizesub - self.relative_posx)][int(map_sizesub - self.relative_posy)], settings.windspeed])
 
 wind = Wind()

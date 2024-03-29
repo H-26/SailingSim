@@ -1,10 +1,11 @@
 #Settings
-centre_scale = 0.1
-map_scale = 0.04
-scale = 0.1
-screen_width = 900
-screen_height = 700
+centre_scale = 0.15
+map_scale = 0.05
+scale = 0.15
+screen_width = 1280
+screen_height = 720
 center_boat = True
+windspeed = 15
 
 # Future plan to store settings in a json file
 

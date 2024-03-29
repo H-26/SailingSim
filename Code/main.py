@@ -159,19 +159,20 @@ while running:
         factor = current_time - last_update_time / 50
         # Store the player's current position before updating
         prev_pos = player.pos
+        prev_map_pos = map.pos
         # Update the player
         player.update(keys, factor, screen_size)
         # Create the hud
         if debug:
-            fontSize = 14
+            fontSize = 15
             font = pygame.font.Font(None, fontSize)
             hud_text = ["Speed: {} kts".format(round(player.speed[2], 1)),
                         "Wind Speed: {} kts".format(round(wind.localWind(player.pos[0], player.pos[1])[0], 1)),
-                        "Boat Angle: {}°".format(round(player.angle, 0)),
+                        "Boat Angle to Wind: {}°".format(round(player.boat_angle_to_wind, 1)),
                         "X: {}, Y: {}".format(round(player.pos[0]/100, 0), round(player.pos[1]/100, 0)),
+                        "Map X: {}, Map Y: {}".format(round(map.pos[0]/100, 0), round(map.pos[1]/100, 0)),
                         "Relative X: {}, Relative Y: {}".format(round(wind.relative_posx/100, 0),round(wind.relative_posy/100, 0)),
                         "Wind Angle: {}°".format(round(wind.localWind(player.pos[0], player.pos[1])[1], 1)),
-                        "Boat Angle to Wind: {}°".format(round(player.boat_angle_to_wind, 1)),
                         "Sail Angle to Wind: {}°".format(round(player.sail_angle_to_wind, 1)),
                         "Acceleration: {} kts/s".format(round(player.acceleration[2]/7, 3)),
                         "Tack: {}".format(player.tack),
@@ -180,9 +181,9 @@ while running:
         else:
             fontSize = 30
             font = pygame.font.Font(None, fontSize)
-            hud_text = ["Speed: {} kts".format(round(player.speed[2] / 8, 1)),
+            hud_text = ["Speed: {} kts".format(round(player.speed[2] / 9, 1)),
                         "Wind Speed: {} kts".format(round(wind.localWind(player.pos[0], player.pos[1])[0], 1)),
-                        "Boat Angle: {}°".format(round(player.angle, 1)),
+                        "Boat Angle to Wind: {}°".format(round(player.boat_angle_to_wind, 1)),
                         ]
         hud = []
         for line in hud_text:
@@ -199,14 +200,15 @@ while running:
 
     # Calculate the interpolated position
     interpolated_pos = np.array([int(prev_pos[0] + t * (player.pos[0] - prev_pos[0])), int(prev_pos[1] + t * (player.pos[1] - prev_pos[1]))])
+    interpolated_map_pos = np.array([int(prev_map_pos[0] + t * (map.pos[0] - prev_map_pos[0])), int(prev_map_pos[1] + t * (map.pos[1] - prev_map_pos[1]))])
 
     # Draw the screen
     screen.fill((41, 74, 143))
     width, height = pygame.display.get_surface().get_size()
-    wind.findTiles(screen, screen_size, interpolated_pos[0], interpolated_pos[1], map.pos[0], map.pos[1])
-    player.draw(screen, screen_size, interpolated_pos[0], interpolated_pos[1], map.pos[0], map.pos[1])
-    player.drawPointers(screen, screen_size, interpolated_pos[0], interpolated_pos[1], map.pos[0], map.pos[1])
-    # map.draw(screen, screen_size, interpolated_pos[0], interpolated_pos[1], map.pos[0], map.pos[1])
+    wind.findTiles(screen, screen_size, interpolated_pos[0], interpolated_pos[1], interpolated_map_pos[0], interpolated_map_pos[1])
+    player.draw(screen, screen_size, interpolated_pos[0], interpolated_pos[1], interpolated_map_pos[0], interpolated_map_pos[1])
+    player.drawPointers(screen, screen_size, interpolated_pos[0], interpolated_pos[1], interpolated_map_pos[0], interpolated_map_pos[1])
+    # map.draw(screen, screen_size, interpolated_pos[0], interpolated_pos[1], interpolated_map_pos[0], interpolated_map_pos[1])
     for text_surface in enumerate(hud):
         screen.blit(text_surface[1], (10, 15 + ((text_surface[0]) * fontSize - 4)))
 

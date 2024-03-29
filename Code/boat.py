@@ -72,7 +72,8 @@ class Boat(pygame.sprite.Sprite):
     def drawPointers(self, screen, screen_size, interpolated_posx, interpolated_posy, map_posx, map_posy):
         # Draw wind pointer
         windpointer = self.windpointer.copy()
-        windpointer = pygame.transform.scale(windpointer, (int(windpointer.get_width() * settings.scale * 0.15 * self.wind[0]), int(windpointer.get_height() * settings.scale * 0.15 * self.wind[0])))
+        scale = (self.wind[0]/self.wind[2])
+        windpointer = pygame.transform.scale(windpointer, (int(windpointer.get_width() * settings.scale * scale), int(windpointer.get_height() * settings.scale * scale)))
         windpointer = pygame.transform.rotate(windpointer, -self.wind[1])
         windpointerRect = windpointer.get_rect()
         if settings.center_boat:
@@ -132,13 +133,6 @@ class Boat(pygame.sprite.Sprite):
             self.sail = port_sail
     # Calculate speed of boat using acceleration
     def calcSpeed(self):
-        self.wind = wind.localWind(self.pos[0], self.pos[1])
-        if self.tack == "starboard":
-            self.boat_angle_to_wind = (self.angle + self.wind[1]) % 360
-            self.sail_angle_to_wind = self.boat_angle_to_wind - (100 - (self.sail_angle - 260))
-        elif self.tack == "port":
-            self.boat_angle_to_wind = (360 - self.angle - self.wind[1]) % 360
-            self.sail_angle_to_wind = self.boat_angle_to_wind - self.sail_angle
         #Calculate acceleration for x, y and total. Use acceleration function to calculate acceleration, multiply by windspeed and subtract friction
         acceleration_calculation = wind.accelerationFunction(self.sail_angle_to_wind) * self.wind[0] - (abs(self.angular_velocity) * 0.01)
         # Removed previous acceleration calculation for x and y so boat always moves in direction of travel
@@ -149,10 +143,23 @@ class Boat(pygame.sprite.Sprite):
         self.speed[0] = math.sin(math.radians(self.angle)) * self.speed[2]
         self.speed[1] = math.cos(math.radians(self.angle)) * self.speed[2]
 
+    def updatewind(self):
+        self.wind = wind.localWind(self.pos[0], self.pos[1])
+
+    def updateangles(self):
+        if self.tack == "starboard":
+            self.boat_angle_to_wind = (self.angle + self.wind[1]) % 360
+            self.sail_angle_to_wind = self.boat_angle_to_wind - (100 - (self.sail_angle - 260))
+        elif self.tack == "port":
+            self.boat_angle_to_wind = (360 - self.angle - self.wind[1]) % 360
+            self.sail_angle_to_wind = self.boat_angle_to_wind - self.sail_angle
+
     # Update boat
     def update(self, keys, factor, screen_size):
+        self.updatewind()
         self.steer((keys[pygame.K_d] - keys[pygame.K_a]))
         self.changeTack()
+        self.updateangles()
         self.calcSpeed()
         self.move()
     # Move boat according to speed
